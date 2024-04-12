@@ -1,3 +1,27 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2024 Matt Giacomini
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package com.gltech.batchcache;
 
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -10,11 +34,38 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * BatchCacheAspect is a caching concern that is designed with two goals in mind.  First, allow caching to be defined
+ * as simple annotations on methods (JCache or SpringCache Style) and have the leverage the performance of batching.
+ *
+ * <p>It is designed and tested for Aspect Oriented Annotations in Spring.
+ *
+ * <p><a href="https://docs.spring.io/spring-framework/reference/core/aop.html">Aspect Oriented Programming with Spring</a>
+ *
+ * @author Matt Giacomini
+ * @see Aspect
+ */
 @Aspect
 public class BatchCacheAspect
 {
     private CacheClient cacheClient;
 
+    /**
+     * Aspect method that runs "around" a method annotated with @BatchCache. The method flow is as follows:
+     * <ul>
+     *     <li>Determine which objects are already in the cache.</li>
+     *     <li>Get any missing objects from cache. (some may be in cache some may not)</li>
+     *     <li>Cache any objects that were missing from cache</li>
+     *     <li>return results</li>
+     * </ul>
+     *
+     * @param joinPoint  JoinPoint provided by the APO Framework.
+     * @param batchCache BatchCache annotation provided by the APO Framework.
+     * @return the results of the annotated method.
+     * @throws Throwable Generic throwable because joinPoint.proceed() could reference anything
+     * @see BatchCache
+     * @see Around
+     */
     @Around(value = "@annotation(batchCache)")
     public Object batchCache(ProceedingJoinPoint joinPoint, BatchCache batchCache) throws Throwable
     {
@@ -23,7 +74,7 @@ public class BatchCacheAspect
             throw new IllegalArgumentException("Valid key required for Caching");
         }
 
-        // If we got no arguements then just cache everything with the key name
+        // If we got no arguments then just cache everything with the key name
         if (joinPoint.getArgs().length == 0)
         {
             return getAllForKey(batchCache.key(), joinPoint);
@@ -437,6 +488,12 @@ public class BatchCacheAspect
         throw new IllegalArgumentException("Class type " + clazz.getName() + " not supported.");
     }
 
+    /**
+     * Set your cache implementation based on CacheClient Interface
+     *
+     * @param cacheClient Implementation of CacheClient to support get/set/delete.
+     * @see CacheClient
+     */
     public void setCacheClient(CacheClient cacheClient)
     {
         this.cacheClient = cacheClient;

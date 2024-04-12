@@ -1,3 +1,27 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2024 Matt Giacomini
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package com.gltech.batchcache;
 
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -10,13 +34,35 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * BatchCacheEvictAspect is a caching concern that is designed with two goals in mind.  First, allow caching to be defined
+ * as simple annotations on methods (JCache or SpringCache Style) and have the leverage the performance of batching.
+ *
+ * <p>It is designed and tested for Aspect Oriented Annotations in Spring.
+ *
+ * <p><a href="https://docs.spring.io/spring-framework/reference/core/aop.html">Aspect Oriented Programming with Spring</a>
+ *
+ * @author Matt Giacomini
+ * @see Aspect
+ */
 @Aspect
 public class BatchCacheEvictAspect
 {
     private CacheClient cacheClient;
 
+    /**
+     * Aspect method that runs "around" a method annotated with @BatchCacheEvict. This method simply needs to find out
+     * which objects need to be evicted and evict them from cache.
+     *
+     * @param joinPoint       JoinPoint provided by the APO Framework.
+     * @param batchCacheEvict BatchCacheEvict annotation provided by the APO Framework.
+     * @return the results of the annotated method.
+     * @throws Throwable Generic throwable because joinPoint.proceed() could reference anything
+     * @see BatchCacheEvict
+     * @see Around
+     */
     @Around(value = "@annotation(batchCacheEvict)")
-    public Object batchCache(ProceedingJoinPoint joinPoint, BatchCacheEvict batchCacheEvict) throws Throwable
+    public Object batchCacheEvict(ProceedingJoinPoint joinPoint, BatchCacheEvict batchCacheEvict) throws Throwable
     {
         if (batchCacheEvict.key() == null || batchCacheEvict.key().isEmpty())
         {
@@ -160,6 +206,12 @@ public class BatchCacheEvictAspect
         }
     }
 
+    /**
+     * Set your cache implementation based on CacheClient Interface
+     *
+     * @param cacheClient Implementation of CacheClient to support get/set/delete.
+     * @see CacheClient
+     */
     public void setCacheClient(CacheClient cacheClient)
     {
         this.cacheClient = cacheClient;
