@@ -48,7 +48,19 @@ import java.util.stream.Collectors;
 @Aspect
 public class BatchCacheEvictAspect
 {
-    private CacheClient cacheClient;
+    private final CacheClient cacheClient;
+
+    /**
+     * Set your cache implementation based on CacheClient Interface
+     *
+     * @param cacheClient Implementation of CacheClient to support get/set/delete.
+     * @see CacheClient
+     */
+    public BatchCacheEvictAspect(CacheClient cacheClient)
+    {
+        this.cacheClient = cacheClient;
+    }
+
 
     /**
      * Aspect method that runs "around" a method annotated with @BatchCacheEvict. This method simply needs to find out
@@ -204,16 +216,5 @@ public class BatchCacheEvictAspect
         {
             return getIds().stream().map(id -> getKeySet(batchCacheEvict, id)).flatMap(Set::stream).collect(Collectors.toSet());
         }
-    }
-
-    /**
-     * Set your cache implementation based on CacheClient Interface
-     *
-     * @param cacheClient Implementation of CacheClient to support get/set/delete.
-     * @see CacheClient
-     */
-    public void setCacheClient(CacheClient cacheClient)
-    {
-        this.cacheClient = cacheClient;
     }
 }

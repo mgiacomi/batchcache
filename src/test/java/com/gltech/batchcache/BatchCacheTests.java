@@ -30,11 +30,8 @@ public class BatchCacheTests
     {
         cacheClient = new CacheClientImpl();
 
-        BatchCacheAspect batchCacheAspect = new BatchCacheAspect();
-        ReflectionTestUtils.setField(batchCacheAspect, "cacheClient", cacheClient);
-
-        BatchCacheEvictAspect batchCacheEvictAspect = new BatchCacheEvictAspect();
-        ReflectionTestUtils.setField(batchCacheEvictAspect, "cacheClient", cacheClient);
+        BatchCacheAspect batchCacheAspect = new BatchCacheAspect(cacheClient);
+        BatchCacheEvictAspect batchCacheEvictAspect = new BatchCacheEvictAspect(cacheClient);
 
         TestDAO testDAOImpl = new TestDAOImpl();
         AspectJProxyFactory factory = new AspectJProxyFactory(testDAOImpl);

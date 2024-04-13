@@ -48,7 +48,18 @@ import java.util.stream.Collectors;
 @Aspect
 public class BatchCacheAspect
 {
-    private CacheClient cacheClient;
+    private final CacheClient cacheClient;
+
+    /**
+     * Set your cache implementation based on CacheClient Interface
+     *
+     * @param cacheClient Implementation of CacheClient to support get/set/delete.
+     * @see CacheClient
+     */
+    public BatchCacheAspect(CacheClient cacheClient)
+    {
+        this.cacheClient = cacheClient;
+    }
 
     /**
      * Aspect method that runs "around" a method annotated with @BatchCache. The method flow is as follows:
@@ -486,16 +497,5 @@ public class BatchCacheAspect
         }
 
         throw new IllegalArgumentException("Class type " + clazz.getName() + " not supported.");
-    }
-
-    /**
-     * Set your cache implementation based on CacheClient Interface
-     *
-     * @param cacheClient Implementation of CacheClient to support get/set/delete.
-     * @see CacheClient
-     */
-    public void setCacheClient(CacheClient cacheClient)
-    {
-        this.cacheClient = cacheClient;
     }
 }
