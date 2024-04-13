@@ -6,7 +6,7 @@
 
     <groupId>com.gltech</groupId>
     <artifactId>batchcache</artifactId>
-    <version>0.9.2</version>
+    <version>0.9.3</version>
     <packaging>jar</packaging>
 
     <name>Java Batch Cache</name>
